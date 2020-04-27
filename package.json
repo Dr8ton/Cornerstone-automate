@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/Dr8ton/Cornerstone-automate/issues"
   },
-  "homepage": "https://github.com/Dr8ton/Cornerstone-automate#readme"
+  "homepage": "https://github.com/Dr8ton/Cornerstone-automate#readme",
+  "dependencies": {
+    "@types/node": "^13.13.4"
+  }
 }
