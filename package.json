@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Dr8ton/Cornerstone-automate#readme",
   "dependencies": {
     "@types/node": "^13.13.4",
-    "@types/puppeteer": "^2.0.1"
+    "@types/puppeteer": "^2.0.1",
+    "puppeteer": "^3.0.2"
   }
 }
