@@ -62,7 +62,5 @@ async function loginToCornerstone(page: puppeteer.Page): Promise<puppeteer.Page>
     await page.type('#userNameBox', CREDENTIALS.cornerstone.login);
     await page.type('#passWordBox', CREDENTIALS.cornerstone.password);
     await page.click('#submit');
-
-
     return page;
 }
