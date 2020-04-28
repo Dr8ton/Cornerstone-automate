@@ -14,13 +14,13 @@ async function main() {
 
         const browser = await puppeteer.launch({ headless: false });
         const page = await browser.newPage();
-        await page.setViewport({ width: 900, height: 926 });
+        await page.setViewport({ width: 1000, height: 1000 });
 
         let loginPage = await navToSite(site.rosterUrl, page);
         let rosterPage = await loginToCornerstone(loginPage);
         let report = await scrapeTable(rosterPage);
-        
-        console.log(report); 
+
+        console.log(report);
 
         browser.close();
     }
@@ -28,28 +28,44 @@ async function main() {
 }
 
 async function scrapeTable(page: puppeteer.Page): Promise<string[]> {
-    // await waitUntilPageIsLoaded(page); 
-    await page.waitForSelector('table.CsListWithLines > tbody > tr')
-    let trs = await page.$$('td.Panel_contentMiddle > table.CsListWithLines > tbody > tr');
-
     let list = [];
 
-    for (const tr of trs) {
-        let tds = await tr.$$('td');
-
-        let name = await tds[0].$eval('b', node => node.innerHTML)
-        let score = await tds[5].evaluate(node => node.innerHTML.trim())
-        let attachmentLink = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
 
 
-        list.push({
-            name,
-            score,
-            attachmentLink,
-            hasNewSubmission: false
-        })
 
-    }
+
+        await page.waitForSelector('table.CsListWithLines > tbody > tr')
+        let trs = await page.$$('td.Panel_contentMiddle > table.CsListWithLines > tbody > tr');
+
+
+
+
+        for (const tr of trs) {
+            let tds = await tr.$$('td');
+
+            let name = await tds[0].$eval('b', node => node.innerHTML)
+            let score = await tds[5].evaluate(node => node.innerHTML.trim())
+            let attachmentLink = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
+
+
+            list.push({
+                name,
+                score,
+                attachmentLink,
+                hasNewSubmission: false
+            })
+        }
+        console.log(list);
+        
+
+            let nextPageButton = await page.$('#ctl00_ctl00_ContentPlaceHolder1_RosterContent_pg_nextPageLink');
+            if (nextPageButton) {
+                nextPageButton.click();
+            }
+     
+
+
+
     let newSubmissions = [];
     for (const student of list) {
         if (student.score === '') {
