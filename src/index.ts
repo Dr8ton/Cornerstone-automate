@@ -12,7 +12,7 @@ async function main() {
 
         console.log(site.name);
 
-        const browser = await puppeteer.launch({ headless: false });
+        const browser = await puppeteer.launch({ headless: false });// slow down by 250ms 
         const page = await browser.newPage();
         await page.setViewport({ width: 1000, height: 1000 });
 
@@ -28,58 +28,63 @@ async function main() {
 }
 
 async function scrapeTable(page: puppeteer.Page): Promise<string[]> {
-    let list = [];
+    let listOfAllStudentInTable = [];
 
 
 
+    await page.waitForSelector('table.CsListWithLines > tbody > tr')
+    let trs = await page.$$('td.Panel_contentMiddle > table.CsListWithLines > tbody > tr');
 
+    for (const tr of trs) {
+        let tds = await tr.$$('td');
 
-        await page.waitForSelector('table.CsListWithLines > tbody > tr')
-        let trs = await page.$$('td.Panel_contentMiddle > table.CsListWithLines > tbody > tr');
+        let name = await tds[0].$eval('b', node => node.innerHTML)
+        let score = await tds[5].evaluate(node => node.innerHTML.trim())
+        let attachmentLink = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
 
+        listOfAllStudentInTable.push({
+            name,
+            score,
+            attachmentLink,
+            hasNewSubmission: false
+        })
+    }
 
+    let nextPageButton = await page.$('#ctl00_ctl00_ContentPlaceHolder1_RosterContent_pg_nextPageLink');
+    if (nextPageButton) {
+        nextPageButton.click();
+        console.log('next page button clicked')
+    }
 
-
-        for (const tr of trs) {
-            let tds = await tr.$$('td');
-
-            let name = await tds[0].$eval('b', node => node.innerHTML)
-            let score = await tds[5].evaluate(node => node.innerHTML.trim())
-            let attachmentLink = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
-
-
-            list.push({
-                name,
-                score,
-                attachmentLink,
-                hasNewSubmission: false
-            })
-        }
-        console.log(list);
-        
-
-            let nextPageButton = await page.$('#ctl00_ctl00_ContentPlaceHolder1_RosterContent_pg_nextPageLink');
-            if (nextPageButton) {
-                nextPageButton.click();
-            }
-     
 
 
 
     let newSubmissions = [];
-    for (const student of list) {
+    for (const student of listOfAllStudentInTable) {
         if (student.score === '') {
             //check for attachment  
             await navToSite(student.attachmentLink, page)
-            let attachementNotFound = await page.$('#ucAttachment_upAttachments > div > span');
-            if (!attachementNotFound) {
+
+            try {
+                await page.waitForSelector('#ucAttachment_upAttachments > div > span', { timeout: 5000 })
+                console.log('element found')
+            } catch (error) {
+                console.log('element NOT found')
                 student.hasNewSubmission = true;
                 newSubmissions.push(student.name);
             }
+
+
+            // let attachementNotFound = await page.$('#ucAttachment_upAttachments > div > span');
+
+            // if (!attachementNotFound) {
+            //     student.hasNewSubmission = true;
+            //     newSubmissions.push(student.name);
+            // }
         }
 
     }
-
+    console.log('newsub ', newSubmissions);
     return newSubmissions;
 }
 
