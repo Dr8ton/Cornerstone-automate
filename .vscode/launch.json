@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}\\index.js",
+            "program": "${workspaceFolder}/dist/index.js",
             "outFiles": [
                 "${workspaceFolder}/dist/**/*.js"
             ]
@@ -20,7 +20,8 @@
             "type": "node",
             "request": "launch",
             "name": "Launch scrapcer",
-            "program": "${workspaceFolder}/dist/index.js"
+            "program": "${workspaceFolder}/dist/index.js",
+            "runtimeVersion": "10.20.1"
         },
     ]
 }

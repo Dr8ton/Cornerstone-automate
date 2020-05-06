@@ -3,6 +3,11 @@ import puppeteer from 'puppeteer';
 
 const CREDENTIALS = require('../secrets/key.json');
 
+interface roster {
+    name: string, 
+    rosterURL: string, 
+    data: string[]; 
+}
 
 main();
 // Look here for answers : https://stackoverflow.com/questions/49236981/want-to-scrape-table-using-puppeteer-how-can-i-get-all-rows-iterate-through-ro
@@ -10,30 +15,29 @@ main();
 async function main() {
     let URLs = [
         {
-        name: "CPR - SU20", 
-        rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=fa21d00f-7721-4f44-a5f7-a4aa7ed37bbf&back=INSTRUCTOR",
-            all: [{}]
-    },
-    // {
-    //     name: "Physical - SU20",
-    //     rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=a9727b3e-cefe-4406-8167-f449b774de0f&back=INSTRUCTOR"
-    // },
-    // {
-    //     name: "Diploma - SU20",
-    //     rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=4fbc2180-84f8-4b19-afeb-c559fd1f3603&back=INSTRUCTOR"
-    // },
-    {
-        name: "BEMS - SU20",
-        rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR",
-    },
-    // {
-    //     name: "auth - SP20",
-    //     rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=226c4044-9f6d-4904-86c7-b5eca5b81e46&back=INSTRUCTOR"
-    // }
+            name: "CPR - SU20",
+            rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=fa21d00f-7721-4f44-a5f7-a4aa7ed37bbf&back=INSTRUCTOR",
+            data: [''] 
+        },
+        // {
+        //     name: "Physical - SU20",
+        //     rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=a9727b3e-cefe-4406-8167-f449b774de0f&back=INSTRUCTOR"
+        //     ,data: [{}]
+        //     
+        // },
+        // {
+        //     name: "Diploma - SU20",
+        //     rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=4fbc2180-84f8-4b19-afeb-c559fd1f3603&back=INSTRUCTOR"
+        // ,data: [{}]
+
+        // },
+        {
+            name: "BEMS - SU20",
+            rosterUrl: "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR",
+            data: ['']
+        }
     ]
     for (let site of URLs) {
-
-        console.log(site.name);
 
         const browser = await puppeteer.launch({ headless: false });// slow down by 250ms 
         const page = await browser.newPage();
@@ -42,12 +46,38 @@ async function main() {
         let loginPage = await navToSite(site.rosterUrl, page);
         let rosterPage = await loginToCornerstone(loginPage);
         let data = await scrapeTable(rosterPage);
-        site.all = data; 
+        site.data = data;
 
         browser.close();
     }
-console.log(URLs)
+
+    for (let site of URLs) {
+        //open roster page
+        const browser = await puppeteer.launch({ headless: false });// slow down by 250ms 
+        const page = await browser.newPage();
+        await page.setViewport({ width: 1000, height: 1000 });
+
+        let loginPage = await navToSite(site.rosterUrl, page);
+        let rosterPage = await loginToCornerstone(loginPage);
+
+        for (const student of site.data) {
+            if (student.score === '') {
+                let page1 = await browser.newPage();
+                let attachmentPage = await navToSite(student.attachmentLinkURL, page1);
+                //open attachment link in new tab. 
+                //check for attachment
+                //if attachment not found , close tab
+
+            }
+        }
+        //if score is not set
+        // open attachment in new tab
+        //check for attachment
+        //if attchment not found, close the tab
+    }
+
 }
+
 
 async function scrapeTable(page: puppeteer.Page): Promise<string[]> {
     let listOfAllStudentInTable: any[] = [];
@@ -63,12 +93,12 @@ async function scrapeTable(page: puppeteer.Page): Promise<string[]> {
 
             let name = await tds[0].$eval('b', node => node.innerHTML)
             let score = await tds[5].evaluate(node => node.innerHTML.trim())
-            let attachmentLink = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
+            let attachmentLinkURL = await tds[8].$eval('a.action-attachment', a => a.getAttribute('href'))
 
             listOfAllStudentInTable.push({
                 name,
                 score,
-                attachmentLink,
+                attachmentLinkURL,
                 hasNewSubmission: false
             })
         }
@@ -76,11 +106,7 @@ async function scrapeTable(page: puppeteer.Page): Promise<string[]> {
             await page.click('#ctl00_ctl00_ContentPlaceHolder1_RosterContent_pg_nextPageLink');
         }
     }
-    // let nextPageButton = await page.$('#ctl00_ctl00_ContentPlaceHolder1_RosterContent_pg_nextPageLink');
-    // if (nextPageButton) {
-    //    await nextPageButton.click();
-    //     console.log('next page button clicked')
-    // }
+
 
 
 
