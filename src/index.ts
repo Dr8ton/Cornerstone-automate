@@ -3,10 +3,11 @@ import puppeteer from 'puppeteer';
 
 const CREDENTIALS = require('../secrets/key.json');
 
-interface roster {
+interface studentRow {
     name: string,
-    rosterURL: string,
-    data: string[];
+    score: string,
+    attachmentLinkURL:string,
+    hasNewSubmission: boolean
 }
 
 main();
@@ -21,16 +22,16 @@ async function main() {
         "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR",
 
     ]
-    for (let site of URLs) {
+    for (let url of URLs) {
 
         const browser = await puppeteer.launch({ headless: false });// slow down by 250ms 
         const page = await browser.newPage();
         await page.setViewport({ width: 1000, height: 1000 });
 
-        let loginPage = await navToSite(site.rosterUrl, page);
+        let loginPage = await navToSite(url, page);
         let rosterPage = await loginToCornerstone(loginPage);
         let data = await scrapeTable(rosterPage);
-        site.data = data;
+ 
 
         browser.close();
     }
