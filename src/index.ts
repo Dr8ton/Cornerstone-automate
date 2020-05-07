@@ -11,15 +11,15 @@ interface studentRow {
 }
 let URLs = [
     "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=fa21d00f-7721-4f44-a5f7-a4aa7ed37bbf&back=INSTRUCTOR",
-    // "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=a9727b3e-cefe-4406-8167-f449b774de0f&back=INSTRUCTOR",
-    // "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=4fbc2180-84f8-4b19-afeb-c559fd1f3603&back=INSTRUCTOR",
-    // "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR",
+    "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=a9727b3e-cefe-4406-8167-f449b774de0f&back=INSTRUCTOR",
+    "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=4fbc2180-84f8-4b19-afeb-c559fd1f3603&back=INSTRUCTOR",
+    "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR",
 
 ]
 
 async function main() {
     for (let url of URLs) {
-
+console.log("************************************************************")
         const browser = await puppeteer.launch({ headless: false });// slow down by 250ms 
         const page = await browser.newPage();
         await page.setViewport({ width: 1000, height: 1000 });
@@ -30,24 +30,36 @@ async function main() {
 
         for (const row of rows) {
             //if score is not set
+            console.log(row.name, " scored: ", row.score)
             if (!row.score) {
                 let tab = await browser.newPage();
-                let attachementPage = await navToSite(row.attachmentLinkURL, page1);
+                await navToSite(row.attachmentLinkURL, tab);
                 try {
-                    await tab.waitForSelector('#ucAttachment_upAttachments > div > span', { timeout: 5000 })
-                    console.log('attachment not found')
-                } catch (error) {
-                    console.log('attachment found')
+                    let attachement = await tab.waitForSelector('#ucAttachment_dlAttachment_ctl01_lbFile', { timeout: 5000 })
+                    await attachement.click(); 
+                    console.log('     attachment found')
                     row.hasNewSubmission = true;
+                } catch (error) {
+                    console.log('     attachment not found')
                     await tab.close()
                 }
+                
+                // try {
+                //     await tab.waitForSelector('#ucAttachment_upAttachments > div > span', { timeout: 5000 })
+                //     console.log('attachment not found')
+                //     await tab.close()
+                // } catch (error) {
+                //     console.log('attachment found')
+                //     row.hasNewSubmission = true;
+                // }
+            }else{
+                console.log("     skipped")
             }
             // open attachment in new tab
             //check for attachment
             //if attchment not found, close the tab
         }
 
-        browser.close();
     }
 
 
