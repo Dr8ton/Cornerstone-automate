@@ -34,7 +34,7 @@ console.log("************************************************************")
                 let tab = await browser.newPage();
                 await navToSite(row.attachmentLinkURL, tab);
                 try {
-                    let attachement = await tab.waitForSelector('#ucAttachment_dlAttachment_ctl01_lbFile', { timeout: 5000 })
+                    let attachement = await tab.waitForSelector('#ucAttachment_dlAttachment_ctl01_lbFile', { timeout: 2500 })
                     await attachement.click(); 
                     console.log('     attachment found')
                     row.hasNewSubmission = true;
