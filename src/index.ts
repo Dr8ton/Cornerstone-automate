@@ -14,6 +14,8 @@ let URLs = [
     "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=d64c64a5-a89f-48fd-8d0b-4fd1d4dde710&back=INSTRUCTOR", // Auth
     "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=fa21d00f-7721-4f44-a5f7-a4aa7ed37bbf&back=INSTRUCTOR", // CPR
     "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=a9727b3e-cefe-4406-8167-f449b774de0f&back=INSTRUCTOR", // Physical
+    "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=18261193-0a67-43c8-a103-e97d5a4bcf6b&back=INSTRUCTOR", // Clinical One
+    "https://acadian.csod.com/LMS/ILT/event_session_roster.aspx?loId=fbfd4b8e-0fd4-47d0-9784-f20d56d312eb&back=INSTRUCTOR" // Clinical Two
 ]
 
 async function main() {
